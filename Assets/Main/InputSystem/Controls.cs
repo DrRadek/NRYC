@@ -143,6 +143,24 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""InteractWithChair"",
+                    ""type"": ""Button"",
+                    ""id"": ""60666763-0d70-41df-8006-b80adceb1ce2"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ChangeCatSpeed"",
+                    ""type"": ""Value"",
+                    ""id"": ""02b854f7-3b72-4fe2-be67-7a20be8defed"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -237,7 +255,7 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""ce094487-3195-44ec-adba-f0decadabd1a"",
-                    ""path"": """",
+                    ""path"": ""<Keyboard>/r"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -385,6 +403,50 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Rotate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fc5724fc-08d4-400c-b6a4-242dbb3f1f8e"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""InteractWithChair"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""02d7c46a-47c2-4999-9c5e-c4df83177432"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ChangeCatSpeed"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""908ec223-793c-4c41-83d6-6ff8f3c23e7a"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ChangeCatSpeed"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""fe0e0b75-dd04-4708-8058-d6496cebd90f"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ChangeCatSpeed"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 }
@@ -692,6 +754,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         m_Player_FireSecondary = m_Player.FindAction("FireSecondary", throwIfNotFound: true);
         m_Player_WalkUp = m_Player.FindAction("WalkUp", throwIfNotFound: true);
         m_Player_Rotate = m_Player.FindAction("Rotate", throwIfNotFound: true);
+        m_Player_InteractWithChair = m_Player.FindAction("InteractWithChair", throwIfNotFound: true);
+        m_Player_ChangeCatSpeed = m_Player.FindAction("ChangeCatSpeed", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_CursorSwitch = m_UI.FindAction("CursorSwitch", throwIfNotFound: true);
@@ -783,6 +847,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_FireSecondary;
     private readonly InputAction m_Player_WalkUp;
     private readonly InputAction m_Player_Rotate;
+    private readonly InputAction m_Player_InteractWithChair;
+    private readonly InputAction m_Player_ChangeCatSpeed;
     public struct PlayerActions
     {
         private @Controls m_Wrapper;
@@ -800,6 +866,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         public InputAction @FireSecondary => m_Wrapper.m_Player_FireSecondary;
         public InputAction @WalkUp => m_Wrapper.m_Player_WalkUp;
         public InputAction @Rotate => m_Wrapper.m_Player_Rotate;
+        public InputAction @InteractWithChair => m_Wrapper.m_Player_InteractWithChair;
+        public InputAction @ChangeCatSpeed => m_Wrapper.m_Player_ChangeCatSpeed;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -848,6 +916,12 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @Rotate.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRotate;
                 @Rotate.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRotate;
                 @Rotate.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRotate;
+                @InteractWithChair.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteractWithChair;
+                @InteractWithChair.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteractWithChair;
+                @InteractWithChair.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnInteractWithChair;
+                @ChangeCatSpeed.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnChangeCatSpeed;
+                @ChangeCatSpeed.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnChangeCatSpeed;
+                @ChangeCatSpeed.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnChangeCatSpeed;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -891,6 +965,12 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @Rotate.started += instance.OnRotate;
                 @Rotate.performed += instance.OnRotate;
                 @Rotate.canceled += instance.OnRotate;
+                @InteractWithChair.started += instance.OnInteractWithChair;
+                @InteractWithChair.performed += instance.OnInteractWithChair;
+                @InteractWithChair.canceled += instance.OnInteractWithChair;
+                @ChangeCatSpeed.started += instance.OnChangeCatSpeed;
+                @ChangeCatSpeed.performed += instance.OnChangeCatSpeed;
+                @ChangeCatSpeed.canceled += instance.OnChangeCatSpeed;
             }
         }
     }
@@ -1089,6 +1169,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         void OnFireSecondary(InputAction.CallbackContext context);
         void OnWalkUp(InputAction.CallbackContext context);
         void OnRotate(InputAction.CallbackContext context);
+        void OnInteractWithChair(InputAction.CallbackContext context);
+        void OnChangeCatSpeed(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

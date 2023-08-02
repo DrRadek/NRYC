@@ -15,8 +15,8 @@ TagManager:
   - Enemy
   - Pellet
   - Destroyed
-  - 
-  - 
+  - TriggerCountReceiver
+  - TriggerCount
   - 
   - 
   - 

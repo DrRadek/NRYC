@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using UnityEditor.ShaderGraph;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI.Table;
+using UnityEngine.InputSystem;
+
 
 public class Shotgun : MonoBehaviour
 {
     public bool isEquipped = true;
+    public bool isAutomatic = false;
 
     [SerializeField] Pellet pellet;
     [SerializeField] GameObject pelletStorage;
@@ -19,21 +21,52 @@ public class Shotgun : MonoBehaviour
     [SerializeField] float spread = 20.2f;
     [SerializeField] float fireRate = 0.5f;
     [SerializeField] float reloadSpeed = 0.7f;
-    [SerializeField] int ammoLoaded = 1;
+    [SerializeField] int ammoLoaded = 8;
     [SerializeField] int maxAmmoLoaded = 8;
-    [SerializeField] int ammo = 40;
+    // [SerializeField] int ammo = 40;
 
-    // Start is called before the first frame update
-    void Start()
+    float fireProgress = 0;
+
+    Controls controls;
+    Controls.PlayerActions playerControls;
+
+    private void Awake()
     {
-        InvokeRepeating("shoot", 0.5f, 0.5f);
+        controls = new Controls();
+        playerControls = controls.Player;
+
+        playerControls.Fire.performed += Fired;
     }
 
-    void shoot()
+    private void Fired(InputAction.CallbackContext context)
+    {
+        if (isAutomatic || CurrentControls.type != CurrentControls.Types.Game)
+            return;
+
+        if (fireProgress <= 0)
+            Shoot();
+    }
+
+    private void Update()
+    {
+        fireProgress = Mathf.Max(0, fireProgress - Time.deltaTime);
+
+        if (!isAutomatic)
+            return;
+
+        if (CurrentControls.type != CurrentControls.Types.Game || playerControls.Fire.ReadValue<float>() > 0)
+            return;
+
+        if (fireProgress <= 0)
+            Shoot();
+    }
+    
+    void Shoot()
     {
         if (ammoLoaded == 0)
             return;
 
+        fireProgress = fireRate;
         ammoLoaded--;
 
         trans.rotation = transform.rotation;
@@ -42,8 +75,7 @@ public class Shotgun : MonoBehaviour
         for(int i = 0; i < pelletCount; i++)
         {
             Pellet instance = Instantiate(pellet, pelletStorage.transform);
-            instance.transform.position = pelletSpawn.transform.position;
-            instance.transform.rotation = trans.rotation;
+            instance.transform.SetPositionAndRotation(pelletSpawn.transform.position, trans.rotation);
             instance.damage = damage;
             instance.speed = pelletSpeed;
             instance.knockback = pelletKnockback;
@@ -51,4 +83,7 @@ public class Shotgun : MonoBehaviour
             trans.Rotate(Vector3.up, spread/(pelletCount-1));
         }
     }
+
+    private void OnEnable() { controls.Enable(); }
+    private void OnDisable() { controls.Disable(); }
 }

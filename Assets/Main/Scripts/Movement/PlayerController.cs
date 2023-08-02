@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] GameObject rotationHelper;
+    [SerializeField] public GameObject rotationHelper;
     [SerializeField] GameObject shotgun;
     [SerializeField] float speed = 50.0f;
 
@@ -52,8 +52,15 @@ public class PlayerController : MonoBehaviour
         lookOnLook = Quaternion.LookRotation(groundPerpendicular, rotationHelper.transform.up);
         shotgun.transform.rotation = Quaternion.Slerp(shotgun.transform.rotation, lookOnLook, Time.deltaTime * 4.0f);
 
-    }
+        if (transform.position.y < -1)
+        {
+            var pos = transform.position;
+            pos.y = 3;
+            transform.position = pos;
+        }
+            
 
+    }
 
     private void OnEnable() { controls.Enable(); }
     private void OnDisable() { controls.Disable(); }

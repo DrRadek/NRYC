@@ -12,6 +12,8 @@ public class Enemy : MonoBehaviour
 
     [SerializeField] float speed = 20.0f;
 
+    [SerializeField] List<AudioSource> sounds = new();
+
     Rigidbody rb;
     Health health;
 
@@ -38,6 +40,14 @@ public class Enemy : MonoBehaviour
     void OnDeath(Pellet pellet)
     {
         isDestroyed = true;
+
+        if(Random.Range(0, 25) == 13)
+            sounds[1].Play();
+        else
+            sounds[0].Play();
+
+        MoneyManager.instance.Money += (int)(health.MaxHp * (1 + Mathf.Pow(GameManager.instance.CurrentWave, 2) * 0.2f));
+
         GameManager.instance.EnemiesLeft--;
         GameManager.instance.EnemiesAlive--;
 
@@ -64,7 +74,6 @@ public class Enemy : MonoBehaviour
         computerCollider.transform.position = new Vector3(10000, 10000, 100000);
 
         Destroy(this);
-        //Destroy(rb);
     }
 
     void Knockback(Rigidbody knockRb, Pellet pellet, float strength)
@@ -78,8 +87,12 @@ public class Enemy : MonoBehaviour
 
         Vector3 direction = GameManager.instance.player.transform.position - rb.worldCenterOfMass;
 
-        if (direction.sqrMagnitude > 50) // TODO: add check for player not being alive
+        float sqrMagnitude = direction.sqrMagnitude;
+
+        if (sqrMagnitude > 50)
             direction = GameManager.instance.computer.transform.position - rb.worldCenterOfMass;
+        else if (sqrMagnitude < 30)
+            GameManager.instance.player.speedReduction += 0.003f * Time.deltaTime * (50 - direction.sqrMagnitude);
 
         rb.AddForce(direction.normalized * speed, ForceMode.Acceleration);
 

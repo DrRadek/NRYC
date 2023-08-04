@@ -25,11 +25,14 @@ public class IdleTime : MonoBehaviour
         else
         {
             canvas.enabled = true;
-            oldValue += fillSpeed * trigger.Count * Time.deltaTime;
+            if (StoryManager.instance.gotLinux)
+                oldValue = Random.Range(0.0f, 99.0f);
+            else
+                oldValue += fillSpeed * trigger.Count * Time.deltaTime;
         }
         
         if (bar.SetValue(0, oldValue) == ValueChangeResult.FULL)
-            Debug.Log("Game over");
+            GameManager.instance.OnGameOver();
 
     }
 }

@@ -7,7 +7,11 @@ public class ShowCloseToPlayer : MonoBehaviour
 {
     TextMeshProUGUI text;
 
-    int sqrDistance = 30;
+    int sqrDistance = 40;
+
+    private bool isVisible = false;
+
+    public bool IsVisible { get => isVisible; private set => isVisible = value; }
 
     private void Awake()
     {
@@ -18,10 +22,8 @@ public class ShowCloseToPlayer : MonoBehaviour
     {
         Vector3 direction = GameManager.instance.player.transform.position - transform.position;
 
-        if (direction.sqrMagnitude < sqrDistance)
-            text.enabled = true;
-        else
-            text.enabled = false;
+        IsVisible = (direction.sqrMagnitude < sqrDistance) ? true : false;
 
+        text.enabled = IsVisible;
     }
 }

@@ -5,6 +5,6 @@ using UnityEngine.Events;
 
 public interface IPrintable
 {
-    public void ManualPrintUpdate(int index);
-    UnityEvent<int,string> OnTextChanged { get; }
+    public void ManualPrintUpdate();
+    UnityEvent<GameObject,int,string> OnTextChanged { get; }
 }

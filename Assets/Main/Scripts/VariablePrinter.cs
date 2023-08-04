@@ -12,33 +12,61 @@ public class VariablePrinter : MonoBehaviour
     [SerializeField] List<PrinterType> types;
 
     [Serializable]
-    public class PrinterType
+    class PrinterType
     {
-        [SerializeField] public GameObject textTarget;
+        [SerializeField] public GameObject textSource;
+        public List<PrinterInfo> info;
+        //[SerializeField] public TMP_Text printTarget;
+        //[SerializeField] public int index;
+        //[SerializeField] public string textBefore;
+        //[SerializeField] public string textAfter;
+    }
+
+    [Serializable]
+    class PrinterInfo
+    {
         [SerializeField] public TMP_Text printTarget;
         [SerializeField] public int index;
         [SerializeField] public string textBefore;
         [SerializeField] public string textAfter;
     }
 
+    Dictionary<GameObject, List<PrinterInfo>> printers = new();
+    Dictionary<GameObject, Dictionary<int,int>> indexes = new();
+
+
     private void Start()
     {
         foreach(var type in types)
         {
-            if (!type.textTarget.TryGetComponent(out IPrintable iTarget))
+            if (!type.textSource.TryGetComponent(out IPrintable iTarget))
             {
-                Debug.LogError($"{type.textTarget} is not {nameof(IPrintable)}");
+                Debug.LogError($"{type.textSource} is not {nameof(IPrintable)}");
                 continue;
             }
 
+            printers.Add(type.textSource, type.info);
+            indexes.Add(type.textSource, new());
+
+            int index = 0;
+            foreach(var info in type.info)
+            {
+                indexes[type.textSource].Add(info.index, index);
+                
+                index++;
+            }
+
             iTarget.OnTextChanged.AddListener(OnTextChanged);
-            iTarget.ManualPrintUpdate(type.index);
+            iTarget.ManualPrintUpdate();
         }
     }
 
-    private void OnTextChanged(int index, string text)
+    private void OnTextChanged(GameObject obj,int index, string text)
     {
-        var type = types[index];
+        if (!indexes[obj].TryGetValue(index, out int i))
+            return;
+
+        var type = printers[obj][i];
         type.printTarget.text = type.textBefore + text + type.textAfter;
     }
 

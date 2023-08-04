@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,6 +9,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] public GameObject rotationHelper;
     [SerializeField] GameObject shotgun;
     [SerializeField] float speed = 50.0f;
+
+    [System.NonSerialized] public float speedReduction = 0;
 
     Rigidbody rb;
 
@@ -35,7 +36,9 @@ public class PlayerController : MonoBehaviour
         dir.z = move.y;
 
         rb.AddForce(transform.rotation * dir * speed);
-        rb.velocity *= 0.9f;
+        rb.velocity *= 0.9f * (1 - speedReduction);
+
+        speedReduction = Mathf.Clamp(speedReduction - 0.01f * Time.deltaTime * 50, 0, 1.2f);
 
         Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (!Physics.Raycast(ray, out RaycastHit hit, 100, 1 << 3))

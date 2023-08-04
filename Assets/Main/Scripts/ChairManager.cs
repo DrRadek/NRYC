@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,16 +11,18 @@ public class ChairManager : MonoBehaviour
     [SerializeField] Collider playerCollider;
     [SerializeField] PlayerController playerController;
     [SerializeField] Transform chairPlace;
-    [SerializeField] GameObject UI;
+    [SerializeField] GameObject ui;
     [SerializeField] GameObject infoText;
     [SerializeField] Animator animator;
     [SerializeField] Transform playerCameraChairTrans;
     [SerializeField] Transform playerCameraMidTrans;
     [SerializeField] Transform playerCameraMapTrans;
     [SerializeField] MonitorScreen monitorScreen;
-
-
     [SerializeField] PlayerCamera playerCamera;
+    [SerializeField] ShowCloseToPlayer chairCloseToPlayer;
+    [SerializeField] UIHide uiHide;
+
+    MonitorScreen.ScreenType lastScreenType;
 
     Coroutine cameraCoroutine;
 
@@ -33,50 +34,72 @@ public class ChairManager : MonoBehaviour
 
     bool isOnChair = false;
 
+    public bool IsOnChair { get => isOnChair; set => isOnChair = value; }
+
     private void Awake()
     {
         controls = new Controls();
         playerControls = controls.Player;
 
-        playerControls.InteractWithChair.performed += UseChair;
+        playerControls.InteractWithChair.performed += UseChairCallback;
 
     }
 
     private void Start()
     {
         playerRb = playerController.GetComponent<Rigidbody>();
-        //TransitionToChair();
+        UseChair();
     }
 
     private void Update()
     {
-        if(isOnChair)
+        if(IsOnChair)
             TransitionToChair();
+
     }
 
-    private void UseChair(InputAction.CallbackContext callback)
+    private void UseChairCallback(InputAction.CallbackContext callback)
+    {
+        if ((chairCloseToPlayer.IsVisible || IsOnChair) && StoryManager.instance.StoryProgression >= StoryManager.Story.wave)
+            UseChair();
+    }
+
+    private void UseChair()
     {
         if (cameraCoroutine != null)
             StopCoroutine(cameraCoroutine);
 
-        isOnChair = !isOnChair;
+        IsOnChair = !IsOnChair;
 
-        playerController.enabled = !isOnChair;
-        playerCollider.enabled = !isOnChair;
-        shotgunCollider.enabled = !isOnChair;
-        shotgun.enabled = !isOnChair;
-        shotgun.gameObject.SetActive(!isOnChair);
-        UI.SetActive(!isOnChair);
-        infoText.SetActive(!isOnChair);
-        playerRb.isKinematic = isOnChair;
+        playerController.enabled = !IsOnChair;
+        playerCollider.enabled = !IsOnChair;
+        shotgunCollider.enabled = !IsOnChair;
+        shotgun.enabled = !IsOnChair;
+        shotgun.gameObject.SetActive(!IsOnChair);
 
-        if (!isOnChair)
+        ui.SetActive(!IsOnChair);
+        infoText.SetActive(!IsOnChair);
+
+        if(!IsOnChair)
+            uiHide.UpdateState();
+
+
+        playerRb.isKinematic = IsOnChair;
+
+        if (!IsOnChair)
         {
             var angles = playerController.rotationHelper.transform.eulerAngles;
             angles.x = 0;
             angles.z = 0;
             playerController.rotationHelper.transform.eulerAngles = angles;
             playerCamera.targetTransform = playerCameraMapTrans;
+
+            if (monitorScreen.activeScreen != MonitorScreen.ScreenType.camera)
+                lastScreenType = monitorScreen.activeScreen;
+
+            if (monitorScreen.activeScreen == MonitorScreen.ScreenType.camera)
+                AudioManager.instance.StopPurr();
+
             monitorScreen.SetScreenType(MonitorScreen.ScreenType.camera);
         }
         else
@@ -86,7 +109,7 @@ public class ChairManager : MonoBehaviour
         }
             
 
-        animator.SetBool("Sitting", isOnChair);
+        animator.SetBool("Sitting", IsOnChair);
 
     }
 
@@ -95,8 +118,13 @@ public class ChairManager : MonoBehaviour
         yield return new WaitForSeconds(0.25f);
         playerCamera.targetTransform = playerCameraChairTrans;
         yield return new WaitForSeconds(0.25f);
-        monitorScreen.SetScreenType(MonitorScreen.ScreenType.desktop);
-
+        
+        if (StoryManager.instance.StoryProgression <= StoryManager.Story.introStart)
+            monitorScreen.SetScreenType(MonitorScreen.ScreenType.cat);
+        else
+        {
+            monitorScreen.SetScreenType(lastScreenType);
+        }
     }
 
     private void TransitionToChair()

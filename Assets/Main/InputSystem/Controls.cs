@@ -161,6 +161,24 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Repair"",
+                    ""type"": ""Button"",
+                    ""id"": ""7e65ea26-11d4-4c31-8ac3-afe38a4f14ce"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""HideUI"",
+                    ""type"": ""Button"",
+                    ""id"": ""74e61eca-9a49-403d-a5b7-1ce7baa092c3"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -449,6 +467,28 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                     ""action"": ""ChangeCatSpeed"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a54087f7-54c4-4af3-bd84-83cd1335314f"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Repair"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8571b27a-54a5-4b74-8a8a-4183c18b58b1"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HideUI"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -756,6 +796,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         m_Player_Rotate = m_Player.FindAction("Rotate", throwIfNotFound: true);
         m_Player_InteractWithChair = m_Player.FindAction("InteractWithChair", throwIfNotFound: true);
         m_Player_ChangeCatSpeed = m_Player.FindAction("ChangeCatSpeed", throwIfNotFound: true);
+        m_Player_Repair = m_Player.FindAction("Repair", throwIfNotFound: true);
+        m_Player_HideUI = m_Player.FindAction("HideUI", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_CursorSwitch = m_UI.FindAction("CursorSwitch", throwIfNotFound: true);
@@ -849,6 +891,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Rotate;
     private readonly InputAction m_Player_InteractWithChair;
     private readonly InputAction m_Player_ChangeCatSpeed;
+    private readonly InputAction m_Player_Repair;
+    private readonly InputAction m_Player_HideUI;
     public struct PlayerActions
     {
         private @Controls m_Wrapper;
@@ -868,6 +912,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         public InputAction @Rotate => m_Wrapper.m_Player_Rotate;
         public InputAction @InteractWithChair => m_Wrapper.m_Player_InteractWithChair;
         public InputAction @ChangeCatSpeed => m_Wrapper.m_Player_ChangeCatSpeed;
+        public InputAction @Repair => m_Wrapper.m_Player_Repair;
+        public InputAction @HideUI => m_Wrapper.m_Player_HideUI;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -922,6 +968,12 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @ChangeCatSpeed.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnChangeCatSpeed;
                 @ChangeCatSpeed.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnChangeCatSpeed;
                 @ChangeCatSpeed.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnChangeCatSpeed;
+                @Repair.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRepair;
+                @Repair.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRepair;
+                @Repair.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRepair;
+                @HideUI.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnHideUI;
+                @HideUI.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnHideUI;
+                @HideUI.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnHideUI;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -971,6 +1023,12 @@ public partial class @Controls : IInputActionCollection2, IDisposable
                 @ChangeCatSpeed.started += instance.OnChangeCatSpeed;
                 @ChangeCatSpeed.performed += instance.OnChangeCatSpeed;
                 @ChangeCatSpeed.canceled += instance.OnChangeCatSpeed;
+                @Repair.started += instance.OnRepair;
+                @Repair.performed += instance.OnRepair;
+                @Repair.canceled += instance.OnRepair;
+                @HideUI.started += instance.OnHideUI;
+                @HideUI.performed += instance.OnHideUI;
+                @HideUI.canceled += instance.OnHideUI;
             }
         }
     }
@@ -1171,6 +1229,8 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         void OnRotate(InputAction.CallbackContext context);
         void OnInteractWithChair(InputAction.CallbackContext context);
         void OnChangeCatSpeed(InputAction.CallbackContext context);
+        void OnRepair(InputAction.CallbackContext context);
+        void OnHideUI(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
